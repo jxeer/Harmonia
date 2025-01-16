@@ -30,7 +30,7 @@ function App() {
             <a href="/about">About</a>
             <a href="/features">Features</a>
             <a href="/waitlist" className="cta-button">
-              Join Now
+              Log In
             </a>
           </div>
         </nav>
@@ -60,7 +60,7 @@ function App() {
                         wellness support.
                       </p>
                       <a href="/waitlist" className="cta-button">
-                        Join Now
+                        Join Our Waitlist Now
                       </a>
                     </div>
                     <div className="hero-image">
