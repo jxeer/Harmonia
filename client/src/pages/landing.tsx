@@ -22,13 +22,13 @@ export default function Landing() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <img src={harmoniaLogo} alt="Harmonia Logo" className="h-10 w-10 rounded-full object-cover" />
-              <span className="text-xl font-bold text-golden-dark">Harmonia</span>
+              <span className="text-xl font-bold text-orange-600">Harmonia</span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <a href="#features" className="text-warm-brown hover:text-golden transition-colors">Features</a>
-              <a href="#providers" className="text-warm-brown hover:text-golden transition-colors">Find Providers</a>
-              <a href="#testimonials" className="text-warm-brown hover:text-golden transition-colors">Testimonials</a>
-              <Button onClick={handleSignIn} className="bg-golden hover:bg-golden-dark text-white px-4 py-2 rounded-full transition-all transform hover:scale-105">
+              <a href="#features" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">Features</a>
+              <a href="#providers" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">Find Providers</a>
+              <a href="#testimonials" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">Testimonials</a>
+              <Button onClick={handleSignIn} className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full transition-all transform hover:scale-105 font-semibold">
                 Sign In
               </Button>
             </div>
@@ -75,25 +75,25 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in">
-              <h1 className="text-5xl lg:text-6xl font-bold text-golden-dark mb-6">
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-800 mb-6">
                 Healthcare that{" "}
-                <span className="text-transparent bg-clip-text bg-sunset-gradient">understands you</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400">understands you</span>
               </h1>
-              <p className="text-xl text-warm-brown mb-8 leading-relaxed">
+              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 Connect with culturally competent healthcare providers who honor your background, 
                 understand your needs, and support your wellness journey.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   onClick={handleSignIn}
-                  className="bg-golden hover:bg-golden-dark text-white px-8 py-4 rounded-full text-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
                 >
                   Find Your Provider
                 </Button>
                 <Button 
                   onClick={handleSignIn}
                   variant="outline"
-                  className="border-2 border-golden text-golden hover:bg-golden hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all"
+                  className="border-2 border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all"
                 >
                   Join as Provider
                 </Button>
