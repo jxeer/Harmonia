@@ -61,6 +61,22 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        // Harmonia custom colors
+        golden: "var(--golden)",
+        "golden-dark": "var(--golden-dark)",
+        "warm-orange": "var(--warm-orange)",
+        "warm-orange-light": "var(--warm-orange-light)",
+        "soft-yellow": "var(--soft-yellow)",
+        "accent-yellow": "var(--accent-yellow)",
+        cream: "var(--cream)",
+        "warm-brown": "var(--warm-brown)",
+        vitality: "var(--vitality)",
+        "vitality-light": "var(--vitality-light)",
+      },
+      backgroundImage: {
+        "sunset-gradient": "linear-gradient(135deg, var(--soft-yellow) 0%, var(--warm-orange-light) 50%, var(--warm-orange) 100%)",
+        "warm-gradient": "linear-gradient(135deg, var(--cream) 0%, var(--soft-yellow) 100%)",
+        "golden-gradient": "linear-gradient(135deg, var(--golden) 0%, var(--golden-dark) 100%)",
       },
       keyframes: {
         "accordion-down": {
