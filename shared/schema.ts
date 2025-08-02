@@ -32,10 +32,11 @@ export const appointmentStatusEnum = pgEnum("appointment_status", ["scheduled", 
 export const messageStatusEnum = pgEnum("message_status", ["sent", "delivered", "read"]);
 export const recordTypeEnum = pgEnum("record_type", ["lab_result", "prescription", "imaging", "consultation_note", "other"]);
 
-// User storage table (required for Replit Auth)
+// User storage table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
+  passwordHash: varchar("password_hash").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),

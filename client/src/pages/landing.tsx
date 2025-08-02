@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Users, MessageCircle, Star, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import harmoniaLogo from "@assets/harmonia_1754109534113.jpg";
 import diverseTeam from "@assets/istockphoto-1387028955-612x612_1754109523067.jpg";
 import healthcareProfessional from "@assets/istockphoto-1407611614-612x612_1754109523068.jpg";
@@ -11,7 +12,7 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignIn = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/login";
   };
 
   return (
