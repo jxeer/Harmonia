@@ -40,6 +40,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: CreateUser): Promise<User>;
+  upsertUser(userData: { id: string; isOnboarded?: boolean; role?: "patient" | "provider" | "admin" }): Promise<User>;
   
   // Patient operations
   getPatientProfile(userId: string): Promise<PatientProfile | undefined>;
@@ -118,6 +119,19 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .insert(users)
       .values(userData)
+      .returning();
+    return user;
+  }
+
+  async upsertUser(userData: { id: string; isOnboarded?: boolean; role?: "patient" | "provider" | "admin" }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isOnboarded: userData.isOnboarded,
+        role: userData.role,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userData.id))
       .returning();
     return user;
   }

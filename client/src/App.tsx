@@ -6,8 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
-import Login from "@/pages/login";
-import Signup from "@/pages/signup";
+
 import Home from "@/pages/home";
 import Onboarding from "@/pages/onboarding";
 import Providers from "@/pages/providers";
@@ -35,14 +34,10 @@ function Router() {
   return (
     <Switch>
       {!isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/login" component={Login} />
-          <Route path="/signup" component={Signup} />
-        </>
+        <Route path="/" component={Landing} />
       ) : (
         <>
-          {!user?.isOnboarded && <Route path="/onboarding" component={Onboarding} />}
+          {user?.role === "patient" && !user?.isOnboarded && <Route path="/onboarding" component={Onboarding} />}
           <Route path="/" component={Home} />
           <Route path="/providers" component={Providers} />
           <Route path="/health-journal" component={HealthJournal} />

@@ -2,8 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { requireAuth } from "./simpleAuth";
-import { authRoutes } from "./authRoutes";
+import { requireAuth } from "./googleAuth";
+import { googleAuthRoutes } from "./googleAuthRoutes";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import {
@@ -17,27 +17,8 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Import session middleware
-  const session = (await import('express-session')).default;
-  const createMemoryStore = (await import('memorystore')).default;
-  const MemoryStore = createMemoryStore(session);
-  
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'harmonia-dev-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    }),
-    cookie: {
-      secure: false, // Set to true in production with HTTPS
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-    },
-  }));
-
   // Auth routes
-  app.use('/api/auth', authRoutes);
+  app.use('/api/auth', googleAuthRoutes);
 
   // Patient profile routes
   app.post('/api/patient/onboarding', requireAuth, async (req: any, res) => {
