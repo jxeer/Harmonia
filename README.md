@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# Harmonia Healthcare Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+Harmonia is a healthcare platform focused on connecting patients with culturally competent healthcare providers. The application emphasizes cultural sensitivity and inclusive healthcare by allowing patients to find providers who understand their cultural background, speak their language, and share similar cultural experiences. The platform features comprehensive health management tools, appointment scheduling, secure messaging, and telehealth capabilities.
 
-In the project directory, you can run:
+## User Preferences
 
-### `npm start`
+Preferred communication style: Simple, everyday language.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## System Architecture
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Frontend Architecture
+- **Framework**: React with TypeScript using Vite as the build tool
+- **Styling**: Tailwind CSS with shadcn/ui component library for consistent design
+- **Routing**: Wouter for client-side routing
+- **State Management**: TanStack Query (React Query) for server state management
+- **Forms**: React Hook Form with Zod validation for type-safe form handling
+- **UI Components**: Radix UI primitives with custom styling for accessibility
 
-### `npm test`
+### Backend Architecture
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript with ES modules
+- **Database ORM**: Drizzle ORM for type-safe database operations
+- **Database**: PostgreSQL (configured for Neon serverless)
+- **Authentication**: OpenID Connect (OIDC) with Replit Auth integration
+- **Session Management**: express-session with PostgreSQL session store
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Data Storage Solutions
+- **Primary Database**: PostgreSQL with the following core entities:
+  - Users (with role-based access: patient, provider, admin)
+  - Patient and Provider profiles with cultural background tracking
+  - Health journal entries for biometric and wellness data
+  - Appointments with virtual/in-person support
+  - Messages for secure communication
+  - Medical records with file attachments
+  - Provider reviews and ratings
+- **File Storage**: Google Cloud Storage for medical records and attachments
+- **Session Storage**: PostgreSQL table for session persistence
 
-### `npm run build`
+### Authentication and Authorization
+- **Primary Auth**: Replit OIDC integration with automatic user provisioning
+- **Session Management**: Server-side sessions stored in PostgreSQL
+- **Role-Based Access**: Three-tier role system (patient, provider, admin)
+- **API Security**: Session-based authentication for all API endpoints
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### External Dependencies
+- **Cloud Storage**: Google Cloud Storage with Replit sidecar authentication
+- **UI Components**: Radix UI primitives for accessible component foundation
+- **File Upload**: Uppy.js for robust file upload handling with progress tracking
+- **Charts**: Recharts for data visualization in dashboards
+- **Database**: Neon PostgreSQL for serverless database hosting
+- **Date Handling**: date-fns for date manipulation and formatting
+- **Icons**: Lucide React for consistent iconography
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Key Architectural Decisions
+- **Monorepo Structure**: Shared schema definitions between client and server in `/shared` directory
+- **Type Safety**: End-to-end TypeScript with Zod schemas for runtime validation
+- **Cultural Focus**: Specialized filtering and matching based on cultural backgrounds and languages
+- **File Security**: Object ACL system for controlling access to medical records and sensitive files
+- **Responsive Design**: Mobile-first approach with Tailwind CSS responsive utilities
+- **Development Experience**: Hot reload with Vite, comprehensive error handling, and structured logging
