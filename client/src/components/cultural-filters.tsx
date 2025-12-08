@@ -121,12 +121,12 @@ export default function CulturalFilters({ onFiltersChange, isLoading }: Cultural
             <Label htmlFor="specialty" className="block text-sm font-medium text-warm-brown mb-2">
               Specialty
             </Label>
-            <Select onValueChange={(value) => updateFilter("specialty", value)} value={filters.specialty}>
+            <Select onValueChange={(value) => updateFilter("specialty", value === "all" ? "" : value)} value={filters.specialty || "all"}>
               <SelectTrigger className="border-cream focus:ring-golden focus:border-golden">
                 <SelectValue placeholder="All Specialties" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Specialties</SelectItem>
+                <SelectItem value="all">All Specialties</SelectItem>
                 {specialties.map((specialty) => (
                   <SelectItem key={specialty} value={specialty}>
                     {specialty}
@@ -140,12 +140,12 @@ export default function CulturalFilters({ onFiltersChange, isLoading }: Cultural
             <Label htmlFor="culturalBackground" className="block text-sm font-medium text-warm-brown mb-2">
               Cultural Background
             </Label>
-            <Select onValueChange={(value) => updateFilter("culturalBackground", value)} value={filters.culturalBackground}>
+            <Select onValueChange={(value) => updateFilter("culturalBackground", value === "all" ? "" : value)} value={filters.culturalBackground || "all"}>
               <SelectTrigger className="border-cream focus:ring-golden focus:border-golden">
                 <SelectValue placeholder="All Backgrounds" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Backgrounds</SelectItem>
+                <SelectItem value="all">All Backgrounds</SelectItem>
                 {culturalBackgrounds.map((background) => (
                   <SelectItem key={background} value={background}>
                     {background}
@@ -159,12 +159,12 @@ export default function CulturalFilters({ onFiltersChange, isLoading }: Cultural
             <Label htmlFor="language" className="block text-sm font-medium text-warm-brown mb-2">
               Language
             </Label>
-            <Select onValueChange={(value) => updateFilter("language", value)} value={filters.language}>
+            <Select onValueChange={(value) => updateFilter("language", value === "all" ? "" : value)} value={filters.language || "all"}>
               <SelectTrigger className="border-cream focus:ring-golden focus:border-golden">
                 <SelectValue placeholder="All Languages" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Languages</SelectItem>
+                <SelectItem value="all">All Languages</SelectItem>
                 {languages.map((language) => (
                   <SelectItem key={language} value={language}>
                     {language}

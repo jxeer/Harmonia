@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Video, Phone, MessageSquare } from "lucide-react";
+import { Star, Calendar, MessageSquare } from "lucide-react";
 import { Link } from "wouter";
 
 interface ProviderCardProps {
@@ -29,9 +29,16 @@ interface ProviderCardProps {
 }
 
 export default function ProviderCard({ provider, onBookAppointment, onSendMessage }: ProviderCardProps) {
+  // Handle null/undefined user data safely
+  if (!provider?.user) {
+    return null;
+  }
+
   const rating = parseFloat(provider.rating || "0");
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
+  const firstName = provider.user.firstName || "";
+  const lastName = provider.user.lastName || "";
 
   return (
     <Card className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-0">
@@ -41,13 +48,13 @@ export default function ProviderCard({ provider, onBookAppointment, onSendMessag
             {provider.user.profileImageUrl ? (
               <img 
                 src={provider.user.profileImageUrl} 
-                alt={`Dr. ${provider.user.firstName} ${provider.user.lastName}`}
+                alt={`Dr. ${firstName} ${lastName}`}
                 className="w-24 h-24 rounded-2xl object-cover"
               />
             ) : (
               <div className="w-24 h-24 rounded-2xl bg-sunset-gradient flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">
-                  {provider.user.firstName[0]}{provider.user.lastName[0]}
+                  {firstName[0] || "?"}{lastName[0] || "?"}
                 </span>
               </div>
             )}
@@ -57,7 +64,7 @@ export default function ProviderCard({ provider, onBookAppointment, onSendMessag
             <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
               <div>
                 <h3 className="text-xl font-bold text-golden-dark">
-                  Dr. {provider.user.firstName} {provider.user.lastName}
+                  Dr. {firstName} {lastName}
                 </h3>
                 <p className="text-warm-brown">{provider.specialty}</p>
                 <p className="text-sm text-warm-brown/70">{provider.location}</p>

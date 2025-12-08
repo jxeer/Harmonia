@@ -39,8 +39,18 @@ export default function Providers() {
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
 
+  const buildSearchUrl = (filters: any) => {
+    const params = new URLSearchParams();
+    if (filters.specialty) params.append("specialty", filters.specialty);
+    if (filters.culturalBackground) params.append("culturalBackground", filters.culturalBackground);
+    if (filters.language) params.append("language", filters.language);
+    if (filters.location) params.append("location", filters.location);
+    const queryString = params.toString();
+    return queryString ? `/api/providers/search?${queryString}` : "/api/providers/search";
+  };
+
   const { data: providers = [], isLoading, refetch } = useQuery({
-    queryKey: ["/api/providers/search", filters],
+    queryKey: [buildSearchUrl(filters)],
     enabled: !!user,
   });
 
