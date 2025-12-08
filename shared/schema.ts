@@ -35,8 +35,7 @@ export const recordTypeEnum = pgEnum("record_type", ["lab_result", "prescription
 // User storage table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique().notNull(),
-  passwordHash: varchar("password_hash").notNull(),
+  email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -249,11 +248,11 @@ export const medicalRecordsRelations = relations(medicalRecords, ({ one }) => ({
 export const providerReviewsRelations = relations(providerReviews, ({ one }) => ({
   patient: one(patientProfiles, {
     fields: [providerReviews.patientId],
-    references: [providerReviews.id],
+    references: [patientProfiles.id],
   }),
   provider: one(providerProfiles, {
     fields: [providerReviews.providerId],
-    references: [providerReviews.id],
+    references: [providerProfiles.id],
   }),
   appointment: one(appointments, {
     fields: [providerReviews.appointmentId],

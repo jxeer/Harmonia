@@ -12,7 +12,7 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignIn = () => {
-    window.location.href = "/api/auth/google";
+    window.location.href = "/api/login";
   };
 
   return (

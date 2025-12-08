@@ -2,8 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { requireAuth } from "./googleAuth";
-import { googleAuthRoutes } from "./googleAuthRoutes";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import {
@@ -17,13 +16,25 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth routes
-  app.use('/api/auth', googleAuthRoutes);
+  // Setup Replit Auth (handles login, logout, callback routes)
+  await setupAuth(app);
+
+  // Auth user endpoint
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 
   // Patient profile routes
-  app.post('/api/patient/onboarding', requireAuth, async (req: any, res) => {
+  app.post('/api/patient/onboarding', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const profileData = insertPatientProfileSchema.parse({
         ...req.body,
         userId,
@@ -45,9 +56,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/patient/profile', requireAuth, async (req: any, res) => {
+  app.put('/api/patient/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const profileData = insertPatientProfileSchema.partial().parse(req.body);
       
       const profile = await storage.updatePatientProfile(userId, profileData);
@@ -59,9 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Provider profile routes
-  app.post('/api/provider/onboarding', requireAuth, async (req: any, res) => {
+  app.post('/api/provider/onboarding', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const profileData = insertProviderProfileSchema.parse({
         ...req.body,
         userId,
@@ -83,9 +94,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/provider/profile', requireAuth, async (req: any, res) => {
+  app.put('/api/provider/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const profileData = insertProviderProfileSchema.partial().parse(req.body);
       
       const profile = await storage.updateProviderProfile(userId, profileData);
@@ -97,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Provider search
-  app.get('/api/providers/search', requireAuth, async (req, res) => {
+  app.get('/api/providers/search', isAuthenticated, async (req, res) => {
     try {
       const { specialty, culturalBackground, language, location } = req.query;
       
@@ -116,9 +127,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Health journal routes
-  app.post('/api/health-journal', requireAuth, async (req: any, res) => {
+  app.post('/api/health-journal', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const patientProfile = await storage.getPatientProfile(userId);
       
       if (!patientProfile) {
@@ -138,9 +149,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/health-journal', requireAuth, async (req: any, res) => {
+  app.get('/api/health-journal', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const patientProfile = await storage.getPatientProfile(userId);
       
       if (!patientProfile) {
@@ -156,9 +167,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Appointment routes
-  app.post('/api/appointments', requireAuth, async (req: any, res) => {
+  app.post('/api/appointments', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const patientProfile = await storage.getPatientProfile(userId);
       
       if (!patientProfile) {
@@ -178,9 +189,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/appointments', requireAuth, async (req: any, res) => {
+  app.get('/api/appointments', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -195,7 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/appointments/:id', requireAuth, async (req, res) => {
+  app.put('/api/appointments/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
       const appointmentData = insertAppointmentSchema.partial().parse(req.body);
@@ -209,9 +220,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Message routes
-  app.post('/api/messages', requireAuth, async (req: any, res) => {
+  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const messageData = insertMessageSchema.parse({
         ...req.body,
         senderId: userId,
@@ -239,9 +250,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/messages/:userId', requireAuth, async (req: any, res) => {
+  app.get('/api/messages/:userId', isAuthenticated, async (req: any, res) => {
     try {
-      const senderId = req.user.id;
+      const senderId = req.user.claims.sub;
       const { userId: receiverId } = req.params;
       
       const messages = await storage.getMessages(senderId, receiverId);
@@ -256,9 +267,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/messages', requireAuth, async (req: any, res) => {
+  app.get('/api/messages', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const messages = await storage.getRecentMessages(userId);
       res.json(messages);
     } catch (error) {
@@ -268,9 +279,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Medical records routes
-  app.post('/api/medical-records', requireAuth, async (req: any, res) => {
+  app.post('/api/medical-records', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -305,9 +316,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/medical-records', requireAuth, async (req: any, res) => {
+  app.get('/api/medical-records', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const patientProfile = await storage.getPatientProfile(userId);
       
       if (!patientProfile) {
@@ -323,9 +334,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Review routes
-  app.post('/api/reviews', requireAuth, async (req: any, res) => {
+  app.post('/api/reviews', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const patientProfile = await storage.getPatientProfile(userId);
       
       if (!patientProfile) {
@@ -357,9 +368,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Provider analytics
-  app.get('/api/provider/analytics', requireAuth, async (req: any, res) => {
+  app.get('/api/provider/analytics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const providerProfile = await storage.getProviderProfile(userId);
       
       if (!providerProfile) {
@@ -375,9 +386,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  app.get('/api/admin/users', requireAuth, async (req: any, res) => {
+  app.get('/api/admin/users', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user || user.role !== "admin") {
@@ -392,9 +403,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/stats', requireAuth, async (req: any, res) => {
+  app.get('/api/admin/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user || user.role !== "admin") {
@@ -410,7 +421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Object storage routes for medical records
-  app.get("/objects/:objectPath(*)", requireAuth, async (req: any, res) => {
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
     const userId = req.user?.claims?.sub;
     const objectStorageService = new ObjectStorageService();
     try {
@@ -433,13 +444,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/objects/upload", requireAuth, async (req, res) => {
+  app.post("/api/objects/upload", isAuthenticated, async (req, res) => {
     const objectStorageService = new ObjectStorageService();
     const uploadURL = await objectStorageService.getObjectEntityUploadURL();
     res.json({ uploadURL });
   });
 
-  app.put("/api/medical-record-files", requireAuth, async (req: any, res) => {
+  app.put("/api/medical-record-files", isAuthenticated, async (req: any, res) => {
     if (!req.body.fileURL) {
       return res.status(400).json({ error: "fileURL is required" });
     }

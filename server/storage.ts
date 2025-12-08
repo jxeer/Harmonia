@@ -32,20 +32,11 @@ import { alias } from "drizzle-orm/pg-core";
 const providerUsers = alias(users, "providerUsers");
 const receiverUsers = alias(users, "receiverUsers");
 
-export type CreateUser = {
-  email: string;
-  passwordHash: string;
-  firstName?: string;
-  lastName?: string;
-  role?: "patient" | "provider" | "admin";
-};
-
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: CreateUser): Promise<User>;
-  upsertUser(userData: { id: string; isOnboarded?: boolean; role?: "patient" | "provider" | "admin" }): Promise<User>;
+  upsertUser(userData: UpsertUser): Promise<User>;
   
   // Patient operations
   getPatientProfile(userId: string): Promise<PatientProfile | undefined>;
@@ -120,23 +111,17 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: CreateUser): Promise<User> {
+  async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
-      .returning();
-    return user;
-  }
-
-  async upsertUser(userData: { id: string; isOnboarded?: boolean; role?: "patient" | "provider" | "admin" }): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({ 
-        isOnboarded: userData.isOnboarded,
-        role: userData.role,
-        updatedAt: new Date(),
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
       })
-      .where(eq(users.id, userData.id))
       .returning();
     return user;
   }
