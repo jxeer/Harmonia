@@ -45,21 +45,30 @@ function updateUserSession(
   user: any,
   tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
 ) {
-  user.claims = tokens.claims();
-  user.access_token = tokens.access_token;
-  user.refresh_token = tokens.refresh_token;
-  user.expires_at = user.claims?.exp;
+  const claims = tokens.claims();
+  // Only store essential claims in session, not tokens
+  user.claims = {
+    sub: claims.sub,
+    email: claims.email,
+    first_name: claims.first_name,
+    last_name: claims.last_name,
+    profile_image_url: claims.profile_image_url,
+  };
+  user.expires_at = claims.exp;
 }
 
-async function upsertUser(
-  claims: any,
-) {
+async function upsertUser(claims: any) {
+  // Validate essential claims before creating user
+  if (!claims.sub || !claims.email) {
+    throw new Error("Invalid claims: missing sub or email");
+  }
+  
   await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    id: claims.sub,
+    email: claims.email,
+    firstName: claims.first_name,
+    lastName: claims.last_name,
+    profileImageUrl: claims.profile_image_url,
   });
 }
 
@@ -134,28 +143,17 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  // Validate user session has required claims
+  if (!req.isAuthenticated() || !user?.claims?.sub) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
+  // Check if session is expired
   const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
-    return next();
+  if (user.expires_at && now > user.expires_at) {
+    // Session expired, require re-authentication
+    return res.status(401).json({ message: "Session expired" });
   }
 
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
+  return next();
 };
