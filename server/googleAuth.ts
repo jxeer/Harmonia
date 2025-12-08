@@ -9,6 +9,18 @@ export interface AuthUser {
   role: 'patient' | 'provider' | 'admin';
 }
 
+// Helper to convert database user to Express user format
+function toExpressUser(dbUser: any): Express.User {
+  return {
+    id: dbUser.id,
+    email: dbUser.email,
+    role: dbUser.role,
+    firstName: dbUser.firstName ?? undefined,
+    lastName: dbUser.lastName ?? undefined,
+    isOnboarded: dbUser.isOnboarded ?? undefined,
+  };
+}
+
 // Configure Google OAuth strategy
 export function setupGoogleAuth() {
   passport.use(new GoogleStrategy({
@@ -37,7 +49,7 @@ export function setupGoogleAuth() {
         });
       }
 
-      return done(null, user);
+      return done(null, toExpressUser(user));
     } catch (error) {
       return done(error, undefined);
     }
@@ -52,7 +64,7 @@ export function setupGoogleAuth() {
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
-      done(null, user);
+      done(null, user ? toExpressUser(user) : null);
     } catch (error) {
       done(error, null);
     }

@@ -26,6 +26,11 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, like, or, sql, inArray } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+
+// Create table aliases for self-joins
+const providerUsers = alias(users, "providerUsers");
+const receiverUsers = alias(users, "receiverUsers");
 
 export type CreateUser = {
   email: string;
@@ -202,13 +207,7 @@ export class DatabaseStorage implements IStorage {
     language?: string;
     location?: string;
   }): Promise<(ProviderProfile & { user: User })[]> {
-    let query = db
-      .select()
-      .from(providerProfiles)
-      .innerJoin(users, eq(providerProfiles.userId, users.id))
-      .where(eq(providerProfiles.isVerified, true));
-
-    const conditions = [];
+    const conditions = [eq(providerProfiles.isVerified, true)];
 
     if (filters.specialty) {
       conditions.push(like(providerProfiles.specialty, `%${filters.specialty}%`));
@@ -226,11 +225,11 @@ export class DatabaseStorage implements IStorage {
       conditions.push(like(providerProfiles.location, `%${filters.location}%`));
     }
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-
-    const results = await query
+    const results = await db
+      .select()
+      .from(providerProfiles)
+      .innerJoin(users, eq(providerProfiles.userId, users.id))
+      .where(and(...conditions))
       .orderBy(desc(providerProfiles.rating), desc(providerProfiles.reviewCount))
       .limit(50);
 
@@ -280,10 +279,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(patientProfiles, eq(appointments.patientId, patientProfiles.id))
       .innerJoin(providerProfiles, eq(appointments.providerId, providerProfiles.id))
       .innerJoin(users, eq(patientProfiles.userId, users.id))
-      .innerJoin(
-        { providerUsers: users },
-        eq(providerProfiles.userId, sql`${users.id}`)
-      )
+      .innerJoin(providerUsers, eq(providerProfiles.userId, providerUsers.id))
       .where(
         role === "patient"
           ? eq(appointments.patientId, userProfile.id)
@@ -311,10 +307,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(patientProfiles, eq(appointments.patientId, patientProfiles.id))
       .innerJoin(providerProfiles, eq(appointments.providerId, providerProfiles.id))
       .innerJoin(users, eq(patientProfiles.userId, users.id))
-      .innerJoin(
-        { providerUsers: users },
-        eq(providerProfiles.userId, sql`${users.id}`)
-      )
+      .innerJoin(providerUsers, eq(providerProfiles.userId, providerUsers.id))
       .where(eq(appointments.id, id));
 
     if (!result) return undefined;
@@ -355,7 +348,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(messages)
       .innerJoin(users, eq(messages.senderId, users.id))
-      .innerJoin({ receiver: users }, eq(messages.receiverId, sql`${users.id}`))
+      .innerJoin(receiverUsers, eq(messages.receiverId, receiverUsers.id))
       .where(
         or(
           and(eq(messages.senderId, userId1), eq(messages.receiverId, userId2)),
@@ -367,7 +360,7 @@ export class DatabaseStorage implements IStorage {
     return results.map(result => ({
       ...result.messages,
       sender: result.users,
-      receiver: result.receiver,
+      receiver: result.receiverUsers,
     }));
   }
 
@@ -377,7 +370,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(messages)
       .innerJoin(users, eq(messages.senderId, users.id))
-      .innerJoin({ receiver: users }, eq(messages.receiverId, sql`${users.id}`))
+      .innerJoin(receiverUsers, eq(messages.receiverId, receiverUsers.id))
       .where(
         or(eq(messages.senderId, userId), eq(messages.receiverId, userId))
       )
@@ -387,7 +380,7 @@ export class DatabaseStorage implements IStorage {
     return results.map(result => ({
       ...result.messages,
       sender: result.users,
-      receiver: result.receiver,
+      receiver: result.receiverUsers,
     }));
   }
 
